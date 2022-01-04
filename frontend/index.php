@@ -1,24 +1,98 @@
-<!DOCTYPE html>
-<html lang="es">
+<?php require_once './components/index-apertura.php' ?>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRUD Pokémon Inc</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-</head>
+<?php
+$url = "http://localhost/projects/crud-pokemon-inc/backend/models/usuarios.php";
+$parameters = "?httpMethods=GET";
+$endpoint = $url . $parameters;
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $endpoint);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+if (curl_errno($ch)) {
+  echo (curl_error($ch));
+}
+curl_close($ch);
+$usuarios = json_decode($response);
+?>
 
-<body>
-  <header class="bg-primary text-light text-center">
-    <h1>CRUD Pokémon Inc</h1>
-  </header>
-  <footer class="bg-dark text-light text-center fixed-bottom p-2">
-    <h6>
-      Desarrollado por Elliot Garamendi
-    </h6>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-</body>
+<main class="container">
+  <div class="row justify-content-center">
 
-</html>
+    <?php
+    if (isset($_GET['mensaje'])) {
+      if (empty($_GET['mensaje'])) {
+      } else {
+    ?>
+        <div class="alert <?= $_GET['clase']; ?> alert-dismissible fade show" role="alert">
+          <strong><?= $_GET['mensaje']; ?></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php
+      }
+    }
+    ?>
+
+    <div class="col-md-8 my-2">
+      <div class="card">
+        <div class="card-header">
+          Listado de usuarios
+        </div>
+        <div class="card-body">
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Usuario</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              foreach ($usuarios as $elemento) {
+                echo "
+                  <tr>
+                    <td>{$elemento->id}</td>
+                    <td>{$elemento->usuario}</td>
+                    <td>{$elemento->descripcion}</td>
+                    <td>
+                      <a href='./views/editar.php?id={$elemento->id}' class='text-decoration-none'>✏</a>
+                      <a href='../backend/models/usuarios.php?httpMethods=DELETE&id={$elemento->id}' class='text-decoration-none'>🗑</a>
+                    </td>
+                  </tr>
+                ";
+              }
+              ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 my-2">
+      <div class="card">
+        <div class="card-header">
+          Crear usuario
+        </div>
+        <div class="card-body">
+          <form method="POST" action="../backend/models/usuarios.php">
+            <div class="mb-3">
+              <input type="text" name="usuario" class="form-control" id="usuario" aria-describedby="usuario" placeholder="Usuario" required />
+            </div>
+            <div class="mb-3">
+              <input type="password" name="clave" class="form-control" id="clave" placeholder="Clave" required />
+            </div>
+            <select class="form-select mb-3" aria-label="Rol" name="idRol" id="idRol" required>
+              <option value="1">Administrador</option>
+              <option value="2" selected>Entreneador</option>
+            </select>
+            <button type="submit" class="btn btn-primary w-100" name="httpMethods" value="POST">Registrar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<?php require_once './components/index-cierre.php' ?>
